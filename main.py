@@ -3,7 +3,8 @@ from flask import Flask
 import telebot
 from telebot import types
 
-TOKEN = TOKEN = "8662370948:AAFCTfSl3BwZUqJ1DpbC18h5U5x6xqZtPI"# የቦት ቶከንህ
+# ትክክለኛው የ Galaxy Bet ቦት ቶከን
+TOKEN = "8662370948:AAFCTfSl3BwZUqJ1DpbC18h5U5x6xqZtPI"
 bot = telebot.TeleBot(TOKEN)
 
 app = Flask(__name__)
@@ -14,11 +15,11 @@ def home():
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
-    # እዚህ ጋር አዝራሮቹን እንፈጥራለን
+    # አዝራሮችን መፍጠር (Deposit, Withdraw, Play Game)
     markup = types.InlineKeyboardMarkup(row_width=2)
     
-    # 1. ፕሌይ ጌም (Mini App) አዝራር
-    web_app = types.WebAppInfo(url="https://your-mini-app-url.com") # የሚከፈተው ሊንክ
+    # 1. ፕሌይ ጌም (Mini App) አዝራር - የራስህን ሚኒ አፕ ሊንክ እዚህ ከተረከብን በኋላ መቀየር ትችላለህ
+    web_app = types.WebAppInfo(url="https://your-mini-app-url.com") 
     btn_play = types.InlineKeyboardButton("🎮 Play Game", web_app=web_app)
     
     # 2. ዲፖዚት አዝራር
@@ -31,7 +32,7 @@ def send_welcome(message):
     
     bot.send_message(
         message.chat.id, 
-        "Welcome to *Galaxy Aviator*! 🚀\n\nChoose an option below:", 
+        "Welcome to *Galaxy Bet*! 🚀\n\nChoose an option below:", 
         parse_mode="Markdown", 
         reply_markup=markup
     )
@@ -45,16 +46,14 @@ def callback_query(call):
         bot.answer_callback_query(call.id)
         bot.send_message(call.message.chat.id, "💰 To Withdraw, please enter your amount.")
 
-# ዌብሁክ ወይም ፖልንግ ማስጀመሪያ
+# ቦቱን እና ሰርቨሩን ማስጀመር
 if __name__ == "__main__":
     import threading
-    # ቦቱን በባክግራውንድ ማስኬድ
     def run_bot():
         bot.infinity_polling()
     
     t = threading.Thread(target=run_bot)
     t.start()
     
-    # Flask ሰርቨር ማስጀመር (Render ፖርት እንዲያገኝ)
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
