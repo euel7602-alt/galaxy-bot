@@ -1,54 +1,60 @@
 import os
-import telebot
 from flask import Flask
-from threading import Thread
+import telebot
+from telebot import types
 
-TOKEN = "8662370948:AAFCtfSId3BwzUqJ1DpbC18h5U5x6xqZtPI"
-WEB_APP_URL = "https://sparkly-douhua-b44b4b.netlify.app"
-
+TOKEN = os.getenv("BOT_TOKEN", "7718049909:AAHZB1t2k5q4yU3l7n5x6J7k8l9m0n1") # የቦት ቶከንህ
 bot = telebot.TeleBot(TOKEN)
-app = Flask('')
+
+app = Flask(__name__)
 
 @app.route('/')
 def home():
-    return "Galaxy Bot is alive!"
-
-def run_web():
-    port = int(os.environ.get("PORT", 8080))
-    app.run(host='0.0.0.0', port=port)
+    return "Bot is running!"
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
-    user_name = message.from_user.first_name
+    # እዚህ ጋር አዝራሮቹን እንፈጥራለን
+    markup = types.InlineKeyboardMarkup(row_width=2)
     
-    markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
-    btn_play = telebot.types.KeyboardButton("🎮 ቪአይፒ ጨዋታ", web_app=telebot.types.WebAppInfo(url=WEB_APP_URL))
-    btn_bonus = telebot.types.KeyboardButton("🎁 ፕሮሞ ኮድ")
-    btn_deposit = telebot.types.KeyboardButton("💰 ገንዘብ ለማድረግ")
-    btn_withdraw = telebot.types.KeyboardButton("💳 ወጪ ለማድረግ")
-    btn_rules = telebot.types.KeyboardButton("🔗 ጋበዝ & አግኝ")
-    btn_account = telebot.types.KeyboardButton("👤 ፕሮפይል & ሒሳብ")
-    btn_help = telebot.types.KeyboardButton("🆘 እርዳታ")
-    btn_lang = telebot.types.KeyboardButton("🌐 ቋንቋ / Language")
+    # 1. ፕሌይ ጌም (Mini App) አዝራር
+    web_app = types.WebAppInfo(url="https://your-mini-app-url.com") # የሚከፈተው ሊንክ
+    btn_play = types.InlineKeyboardButton("🎮 Play Game", web_app=web_app)
     
-    markup.add(btn_play, btn_bonus)
-    markup.add(btn_deposit, btn_withdraw)
-    markup.add(btn_rules, btn_account)
-    markup.add(btn_help, btn_lang)
+    # 2. ዲፖዚት አዝራር
+    btn_deposit = types.InlineKeyboardButton("💳 Deposit", callback_data="deposit")
     
-    welcome_text = (
-        f"እንኳን ወደ ጋላክሲ ቤቲንግ በሰላም መጡ! 🎰\n\n"
-        f"ሰላም {user_name}!\n"
-        f"የጨዋታ ሒሳብ: 0.00 ETB\n"
-        f"የሽልማት ሒሳብ: 0.00 ETB\n\n"
-        f"ከታች ያሉትን ቁልፎች በመጠቀም አገልግሎቶቻችንን ያግኙ 👇"
+    # 3. ዊዝድሮ አዝራር
+    btn_withdraw = types.InlineKeyboardButton("💰 Withdraw", callback_data="withdraw")
+    
+    markup.add(btn_play, btn_deposit, btn_withdraw)
+    
+    bot.send_message(
+        message.chat.id, 
+        "Welcome to *Galaxy Aviator*! 🚀\n\nChoose an option below:", 
+        parse_mode="Markdown", 
+        reply_markup=markup
     )
-    
-    bot.send_message(message.chat.id, welcome_text, reply_markup=markup)
 
+@bot.callback_query_handler(func=lambda call: True)
+def callback_query(call):
+    if call.data == "deposit":
+        bot.answer_callback_query(call.id)
+        bot.send_message(call.message.chat.id, "💳 To Deposit, please choose your payment method or contact support.")
+    elif call.data == "withdraw":
+        bot.answer_callback_query(call.id)
+        bot.send_message(call.message.chat.id, "💰 To Withdraw, please enter your amount.")
+
+# ዌብሁክ ወይም ፖልንግ ማስጀመሪያ
 if __name__ == "__main__":
-    t = Thread(target=run_web)
+    import threading
+    # ቦቱን በባክግራውንድ ማስኬድ
+    def run_bot():
+        bot.infinity_polling()
+    
+    t = threading.Thread(target=run_bot)
     t.start()
     
-    print("ቦቱ እና ዌብሰርቨሩ በመሥራት ላይ ናቸው...")
-    bot.infinity_polling()
+    # Flask ሰርቨር ማስጀመር (Render ፖርት እንዲያገኝ)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
