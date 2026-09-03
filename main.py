@@ -3,7 +3,7 @@ from flask import Flask
 import telebot
 from telebot import types
 
-TOKEN = os.getenv("BOT_TOKEN", "7718049909:AAHZB1t2k5q4yU3l7n5x6J7k8l9m0n1") # የቦት ቶከንህ
+TOKEN = TOKEN = "8662370948:AAFCTfSl3BwZUqJ1DpbC18h5U5x6xqZtPI"# የቦት ቶከንህ
 bot = telebot.TeleBot(TOKEN)
 
 app = Flask(__name__)
