@@ -3,7 +3,7 @@ from flask import Flask
 import telebot
 from telebot import types
 
-# ትክክለኛው የ Galaxy Bet ቦት ቶከን
+# ትክክለኛው የ Galaxy Bet ቦት ቶከን (ከ BotFather የመጣው)
 TOKEN = "8662370948:AAFCTfSl3BwZUqJ1DpbC18h5U5x6xqZtPI"
 bot = telebot.TeleBot(TOKEN)
 
@@ -15,17 +15,11 @@ def home():
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
-    # አዝራሮችን መፍጠር (Deposit, Withdraw, Play Game)
     markup = types.InlineKeyboardMarkup(row_width=2)
     
-    # 1. ፕሌይ ጌም (Mini App) አዝራር - የራስህን ሚኒ አፕ ሊንክ እዚህ ከተረከብን በኋላ መቀየር ትችላለህ
     web_app = types.WebAppInfo(url="https://your-mini-app-url.com") 
     btn_play = types.InlineKeyboardButton("🎮 Play Game", web_app=web_app)
-    
-    # 2. ዲፖዚት አዝራር
     btn_deposit = types.InlineKeyboardButton("💳 Deposit", callback_data="deposit")
-    
-    # 3. ዊዝድሮ አዝራር
     btn_withdraw = types.InlineKeyboardButton("💰 Withdraw", callback_data="withdraw")
     
     markup.add(btn_play, btn_deposit, btn_withdraw)
@@ -46,7 +40,6 @@ def callback_query(call):
         bot.answer_callback_query(call.id)
         bot.send_message(call.message.chat.id, "💰 To Withdraw, please enter your amount.")
 
-# ቦቱን እና ሰርቨሩን ማስጀመር
 if __name__ == "__main__":
     import threading
     def run_bot():
